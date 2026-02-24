@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/png" href="/favicon.png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sapataria Litoral | Renovação e Cuidado de Luxo</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap"
+    rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            serif: ['"Playfair Display"', 'serif'],
+            sans: ['"Inter"', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#fdfbf7',
+              100: '#f9f3e6',
+              200: '#f1e6d0',
+              300: '#e5d1b1',
+              400: '#d5b68d',
+              500: '#c59a6b',
+              600: '#dcc4ac', /* Tom Bege mais claro e luminoso */
+              700: '#b8977e',
+              800: '#8c6b54',
+              900: '#755846',
+              950: '#3e2e25',
+            },
+            luxury: {
+              brown: '#dcc4ac', /* Bege Nobre */
+              gold: '#cca300',
+              beige: '#fcfaf2',
+            },
+            dark: {
+              900: '#1a1a1a',
+              800: '#2d2d2d',
+            }
+          },
+          animation: {
+            'pulse-brown': 'pulse-brown 2s infinite',
+          },
+          keyframes: {
+            'pulse-brown': {
+              '0%, 100%': { boxShadow: '0 0 0 0 rgba(220, 196, 172, 0.4)' },
+              '50%': { boxShadow: '0 0 0 15px rgba(220, 196, 172, 0)' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #ffffff;
+      color: #1a1a1a;
+      margin: 0;
+      padding: 0;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      font-family: 'Playfair Display', serif;
+    }
+
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    .snake-border {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .snake-border::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: conic-gradient(transparent, transparent, transparent, #dcc4ac);
+      animation: rotate 4s linear infinite;
+    }
+
+    .snake-border::after {
+      content: '';
+      position: absolute;
+      inset: 2px;
+      background: white;
+      z-index: 1;
+    }
+
+    @keyframes rotate {
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^19.2.4",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
+    "react/": "https://esm.sh/react@^19.2.4/",
+    "framer-motion": "https://esm.sh/framer-motion@^12.34.0",
+    "lucide-react": "https://esm.sh/lucide-react@^0.563.0",
+    "@google/genai": "https://esm.sh/@google/genai@^1.41.0"
+  }
+}
+</script>
+  <link rel="stylesheet" href="/index.css">
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+
+</html>
