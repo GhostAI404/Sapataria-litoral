@@ -92,6 +92,8 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
     sun: 'Fechado'
   });
 
+  const [contactPhone, setContactPhone] = useState('(13) 99999-9999');
+
   const [landingPage, setLandingPage] = useState({
     heroTitle: 'Restauração de Alta Classe',
     heroSubtitle: 'Maestria Sapataria Litoral',
@@ -141,8 +143,10 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
       if (settingsData) {
         const hours = settingsData.find(s => s.key === 'business_hours')?.value;
         const landing = settingsData.find(s => s.key === 'landing_page')?.value;
+        const phone = settingsData.find(s => s.key === 'contact_phone')?.value;
         if (hours) setBusinessHours(hours);
         if (landing) setLandingPage(landing);
+        if (phone) setContactPhone(phone);
       }
     };
 
@@ -160,7 +164,11 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
         .from('settings')
         .upsert({ key: 'landing_page', value: landingPage });
 
-      if (hoursError || landingError) throw new Error('Erro ao salvar configurações');
+      const { error: phoneError } = await supabase
+        .from('settings')
+        .upsert({ key: 'contact_phone', value: contactPhone });
+
+      if (hoursError || landingError || phoneError) throw new Error('Erro ao salvar configurações');
       alert('Configurações salvas com sucesso!');
     } catch (err) {
       console.error(err);
@@ -1560,6 +1568,16 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   <div className="space-y-1">
                     <label className="text-[10px] uppercase font-black text-slate-400 tracking-widest">Domingo</label>
                     <input type="text" value={businessHours.sun} onChange={(e) => setBusinessHours({ ...businessHours, sun: e.target.value })} className="w-full bg-slate-50 border border-slate-100 p-4 text-sm font-bold outline-none focus:ring-2 focus:ring-brand-600" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-8">
+                <h3 className="text-[10px] font-black uppercase tracking-widest text-brand-600 border-b border-brand-50 pb-2">Informações de Contato</h3>
+                <div className="space-y-6">
+                  <div className="space-y-1">
+                    <label className="text-[10px] uppercase font-black text-slate-400 tracking-widest">Telefone do Cabeçalho</label>
+                    <input type="text" value={contactPhone} onChange={(e) => setContactPhone(e.target.value)} className="w-full bg-slate-50 border border-slate-100 p-4 text-sm font-bold outline-none focus:ring-2 focus:ring-brand-600" placeholder="(13) 99999-9999" />
                   </div>
                 </div>
               </div>

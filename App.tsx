@@ -55,8 +55,10 @@ function App() {
       if (data) {
         const hours = data.find(s => s.key === 'business_hours')?.value;
         const landing = data.find(s => s.key === 'landing_page')?.value;
+        const phone = data.find(s => s.key === 'contact_phone')?.value;
         if (hours) setBusinessHours(hours);
         if (landing) setLandingPage(landing);
+        if (phone) setContactPhone(phone);
       }
     };
 
@@ -92,6 +94,8 @@ function App() {
     sat: '09h às 18h',
     sun: 'Fechado'
   });
+
+  const [contactPhone, setContactPhone] = useState('(13) 99999-9999');
 
   const [landingPage, setLandingPage] = useState({
     heroTitle: 'Restauração de Alta Classe',
@@ -134,7 +138,7 @@ function App() {
       <div className="bg-dark-900 text-brand-100 py-3 px-6 text-[10px] tracking-[0.4em] text-center md:flex md:justify-between md:px-12 uppercase font-bold border-b border-white/5">
         <span className="hidden md:block italic opacity-80">Excelência em Couros • Sapataria Litoral</span>
         <div className="flex justify-center gap-8">
-          <a href="tel:13999999999" className="flex items-center gap-2 hover:text-luxury-brown transition-colors"><PhoneIcon className="w-3 h-3 text-luxury-gold" /> (13) 99999-9999</a>
+          <a href={`tel:${contactPhone.replace(/\D/g, '')}`} className="flex items-center gap-2 hover:text-luxury-brown transition-colors"><PhoneIcon className="w-3 h-3 text-luxury-gold" /> {contactPhone}</a>
           <span className="flex items-center gap-2">
             <ClockIcon className="w-3 h-3 text-luxury-gold" /> {businessHours.monFri}
           </span>
@@ -414,7 +418,7 @@ function App() {
 
       {/* WhatsApp Button */}
       <a
-        href="https://wa.me/5513999999999"
+        href="https://wa.me/5512991507074"
         target="_blank"
         rel="noopener noreferrer"
         className="fixed bottom-8 right-8 z-[100] bg-luxury-brown text-white p-4 rounded-full shadow-[0_15px_40px_rgba(220,196,172,0.3)] animate-pulse-brown hover:scale-110 transition-transform group"

@@ -14,15 +14,15 @@ const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose, items, onUpd
   const total = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
 
   const handleCheckout = () => {
-    const phone = "5513999999999"; // Número da Sapataria Litoral
+    const phone = "5512991507074"; // Número da Sapataria Litoral
     let message = `Olá Sapataria Litoral! Gostaria de um orçamento para os seguintes serviços:\n\n`;
-    
+
     items.forEach(item => {
       message += `• ${item.name} (${item.quantity}x) - R$ ${(item.price * item.quantity).toFixed(2)}\n`;
     });
-    
+
     message += `\nTotal Estimado: R$ ${total.toFixed(2)}\n\nComo posso proceder para enviar meus itens?`;
-    
+
     const encodedMessage = encodeURIComponent(message);
     window.open(`https://wa.me/${phone}?text=${encodedMessage}`, '_blank');
   };
@@ -30,11 +30,11 @@ const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose, items, onUpd
   return (
     <>
       {/* Backdrop */}
-      <div 
+      <div
         className={`fixed inset-0 bg-black/60 z-40 transition-opacity duration-500 backdrop-blur-sm ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
         onClick={onClose}
       />
-      
+
       {/* Sidebar */}
       <div className={`fixed top-0 right-0 h-full w-full max-w-md bg-white z-50 transform transition-transform duration-500 ease-out shadow-2xl ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
         <div className="flex flex-col h-full">
@@ -76,7 +76,7 @@ const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose, items, onUpd
                       <div>
                         <div className="flex justify-between items-start">
                           <h3 className="font-serif font-bold text-dark-900 text-sm leading-tight uppercase tracking-wide">{item.name}</h3>
-                          <button 
+                          <button
                             onClick={() => onRemoveItem(item.id)}
                             className="text-slate-300 hover:text-red-500 transition-colors ml-2"
                           >
@@ -88,7 +88,7 @@ const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose, items, onUpd
                       <div className="flex items-center justify-between mt-2">
                         <span className="font-bold text-dark-900 text-sm">R$ {(item.price * item.quantity).toFixed(2).replace('.', ',')}</span>
                         <div className="flex items-center border border-slate-100 bg-white">
-                          <button 
+                          <button
                             onClick={() => onUpdateQuantity(item.id, -1)}
                             className="w-7 h-7 flex items-center justify-center hover:bg-slate-50 text-slate-400"
                             disabled={item.quantity <= 1}
@@ -96,7 +96,7 @@ const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose, items, onUpd
                             -
                           </button>
                           <span className="w-7 text-center text-[10px] font-bold text-dark-900">{item.quantity}</span>
-                          <button 
+                          <button
                             onClick={() => onUpdateQuantity(item.id, 1)}
                             className="w-7 h-7 flex items-center justify-center hover:bg-slate-50 text-slate-400"
                           >
@@ -127,7 +127,7 @@ const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose, items, onUpd
                   <span>R$ {total.toFixed(2).replace('.', ',')}</span>
                 </div>
               </div>
-              <button 
+              <button
                 className="w-full bg-brand-600 text-white py-5 font-bold text-[11px] uppercase tracking-[0.3em] hover:bg-white hover:text-dark-900 transition-all duration-500 flex items-center justify-center gap-3 shadow-2xl group"
                 onClick={handleCheckout}
               >
