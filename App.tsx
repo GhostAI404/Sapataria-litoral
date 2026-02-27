@@ -7,7 +7,8 @@ import {
   MessageCircle as MessageCircleIcon,
   LayoutDashboard as LayoutDashboardIcon,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  X
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PRODUCTS as initialProducts } from './services/mockData';
@@ -22,6 +23,7 @@ function App() {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isMapModalOpen, setIsMapModalOpen] = useState(false);
 
   const [allProducts, setAllProducts] = useState<Product[]>(initialProducts);
 
@@ -392,14 +394,24 @@ function App() {
           <div className="text-5xl md:text-8xl font-serif font-bold text-white tracking-tighter mb-12 italic opacity-5 select-none uppercase">Litoral</div>
 
           <div className="flex justify-center gap-16 mb-20 text-slate-500">
-            <InstagramIcon className="w-5 h-5 hover:text-luxury-brown transition-all cursor-pointer hover:scale-125" />
-            <PhoneIcon className="w-5 h-5 hover:text-luxury-brown transition-all cursor-pointer hover:scale-125" />
-            <MapPinIcon className="w-5 h-5 hover:text-luxury-brown transition-all cursor-pointer hover:scale-125" />
+            <a href="https://www.instagram.com/sapatarialitoral20?igsh=MXYzZTR5M2xkMWNzZg==" target="_blank" rel="noopener noreferrer">
+              <InstagramIcon className="w-5 h-5 hover:text-luxury-brown transition-all cursor-pointer hover:scale-125 md:w-6 md:h-6" />
+            </a>
+            <a href={`https://wa.me/${contactPhone.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer">
+              <PhoneIcon className="w-5 h-5 hover:text-luxury-brown transition-all cursor-pointer hover:scale-125 md:w-6 md:h-6" />
+            </a>
+            <button onClick={() => setIsMapModalOpen(true)}>
+              <MapPinIcon className="w-5 h-5 hover:text-luxury-brown transition-all cursor-pointer hover:scale-125 md:w-6 md:h-6" />
+            </button>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10 items-center border-t border-white/5 pt-12">
-            <div className="text-[9px] text-slate-500 uppercase tracking-widest font-black md:text-left">
-              São Vicente • SP
+            <div className="text-[9px] text-slate-500 uppercase tracking-widest font-black md:text-left leading-relaxed">
+              São Sebastião • SP<br />
+              <span className="font-medium opacity-70">
+                R. Três Bandeirantes, 185 - Centro<br />
+                CEP 11608-587
+              </span>
             </div>
             <div className="text-[10px] text-luxury-gold font-black uppercase tracking-[0.6em] italic">
               Artesãos da Renovação
@@ -414,6 +426,39 @@ function App() {
       {/* Overlays */}
       <AnimatePresence>
         {isAuthOpen && <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} onLogin={(u) => setUser(u)} />}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {isMapModalOpen && (
+          <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-dark-900/60 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="bg-white w-full max-w-4xl h-[70vh] flex flex-col overflow-hidden shadow-2xl rounded-sm"
+            >
+              <div className="p-4 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
+                <div />
+                <h2 className="text-sm font-serif font-bold text-dark-900 tracking-widest uppercase">Nossa Localização</h2>
+                <button
+                  onClick={() => setIsMapModalOpen(false)}
+                  className="p-2 bg-white border border-slate-200 text-slate-400 hover:text-red-500 hover:border-red-200 transition-colors shadow-sm"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+              <div className="flex-1 bg-slate-100 flex items-center justify-center">
+                <iframe
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d456.3000785667539!2d-45.40031786560762!3d-23.80434880719762!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x94d29a445fb3349f%3A0x808763b44f5cccc5!2sR.%20Tr%C3%AAs%20Bandeirantes%2C%20185%20-%20Centro%2C%20S%C3%A3o%20Sebasti%C3%A3o%20-%20SP%2C%2011608-587!5e0!3m2!1spt-BR!2sbr!4v1772230471923!5m2!1spt-BR!2sbr"
+                  className="w-full h-full border-0"
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                ></iframe>
+              </div>
+            </motion.div>
+          </div>
+        )}
       </AnimatePresence>
 
       {/* WhatsApp Button */}
