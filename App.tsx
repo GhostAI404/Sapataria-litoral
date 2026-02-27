@@ -161,7 +161,7 @@ function App() {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 10 }}
-                  className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-64 bg-dark-900 border border-slate-800 shadow-2xl z-[150] overflow-hidden"
+                  className="absolute top-full right-0 mt-2 w-64 bg-dark-900 border border-slate-800 shadow-2xl z-[150] overflow-hidden"
                 >
                   <div className="bg-brand-900/50 p-3 border-b border-white/5 text-center">
                     <h4 className="text-[10px] uppercase tracking-widest text-luxury-gold font-black">Horários de Loja</h4>
