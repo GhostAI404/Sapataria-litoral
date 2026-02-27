@@ -24,6 +24,7 @@ function App() {
   const [user, setUser] = useState<User | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [isMapModalOpen, setIsMapModalOpen] = useState(false);
+  const [isHoursDropdownOpen, setIsHoursDropdownOpen] = useState(false);
 
   const [allProducts, setAllProducts] = useState<Product[]>(initialProducts);
 
@@ -91,10 +92,14 @@ function App() {
   const [visibleBoutique, setVisibleBoutique] = useState(4);
   const [visibleCutelaria, setVisibleCutelaria] = useState(3);
 
-  const [businessHours, setBusinessHours] = useState({
-    monFri: '09h às 19h',
-    sat: '09h às 18h',
-    sun: 'Fechado'
+  const [businessHours, setBusinessHours] = useState<Record<string, string>>({
+    seg: '09h às 19h',
+    ter: '09h às 19h',
+    qua: '09h às 19h',
+    qui: '09h às 19h',
+    sex: '09h às 19h',
+    sab: '09h às 18h',
+    dom: 'Fechado'
   });
 
   const [contactPhone, setContactPhone] = useState('(13) 99999-9999');
@@ -141,9 +146,48 @@ function App() {
         <span className="hidden md:block italic opacity-80">Excelência em Couros • Sapataria Litoral</span>
         <div className="flex justify-center gap-8">
           <a href={`tel:${contactPhone.replace(/\D/g, '')}`} className="flex items-center gap-2 hover:text-luxury-brown transition-colors"><PhoneIcon className="w-3 h-3 text-luxury-gold" /> {contactPhone}</a>
-          <span className="flex items-center gap-2">
-            <ClockIcon className="w-3 h-3 text-luxury-gold" /> {businessHours.monFri}
-          </span>
+          <div
+            className="relative"
+            onMouseEnter={() => setIsHoursDropdownOpen(true)}
+            onMouseLeave={() => setIsHoursDropdownOpen(false)}
+          >
+            <span className="text-[9px] uppercase tracking-[0.2em] font-black text-slate-300 flex items-center gap-2 cursor-pointer hover:text-white transition-colors py-2">
+              <ClockIcon className="w-3 h-3 text-luxury-gold" /> Confira nossos Horários
+            </span>
+
+            <AnimatePresence>
+              {isHoursDropdownOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
+                  className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-64 bg-dark-900 border border-slate-800 shadow-2xl z-[150] overflow-hidden"
+                >
+                  <div className="bg-brand-900/50 p-3 border-b border-white/5 text-center">
+                    <h4 className="text-[10px] uppercase tracking-widest text-luxury-gold font-black">Horários de Loja</h4>
+                  </div>
+                  <ul className="divide-y divide-white/5 p-2">
+                    {[
+                      { key: 'seg', label: 'Segunda-feira' },
+                      { key: 'ter', label: 'Terça-feira' },
+                      { key: 'qua', label: 'Quarta-feira' },
+                      { key: 'qui', label: 'Quinta-feira' },
+                      { key: 'sex', label: 'Sexta-feira' },
+                      { key: 'sab', label: 'Sábado' },
+                      { key: 'dom', label: 'Domingo' }
+                    ].map((day) => (
+                      <li key={day.key} className="flex justify-between items-center py-2 px-3 hover:bg-white/5 transition-colors">
+                        <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{day.label}</span>
+                        <span className={`text-[10px] font-black tracking-widest ${businessHours[day.key] === 'Fechado' ? 'text-red-400/80' : 'text-white'}`}>
+                          {businessHours[day.key] || 'Não definido'}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
       </div>
 

@@ -83,13 +83,24 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
   // State for Financial Filter
   const [financeFilter, setFinanceFilter] = useState<'Todos' | 'Entrada' | 'Saída'>('Todos');
 
+  // Autocomplete/Search states for Novo Registro
+  const [customerSearchTerm, setCustomerSearchTerm] = useState('');
+  const [isCustomerDropdownOpen, setIsCustomerDropdownOpen] = useState(false);
+  const [selectedCustomerForOrder, setSelectedCustomerForOrder] = useState<any>(null);
+  const [orderPhoneStr, setOrderPhoneStr] = useState('');
+  const [orderEmailStr, setOrderEmailStr] = useState('');
+
   // --- DATABASE MOCK STATE ---
   const [orders, setOrders] = useState<any[]>([]);
 
-  const [businessHours, setBusinessHours] = useState({
-    monFri: '09h às 19h',
-    sat: '09h às 18h',
-    sun: 'Fechado'
+  const [businessHours, setBusinessHours] = useState<Record<string, string>>({
+    seg: '09h às 19h',
+    ter: '09h às 19h',
+    qua: '09h às 19h',
+    qui: '09h às 19h',
+    sex: '09h às 19h',
+    sab: '09h às 18h',
+    dom: 'Fechado'
   });
 
   const [contactPhone, setContactPhone] = useState('(13) 99999-9999');
@@ -115,6 +126,14 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
     setInventoryTypeFilter('Todos');
     setNotasStatusFilter('Todos');
   }, [activeSection]);
+
+
+  // Handle closing dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = () => setIsCustomerDropdownOpen(false);
+    window.addEventListener('click', handleClickOutside);
+    return () => window.removeEventListener('click', handleClickOutside);
+  }, []);
 
   useEffect(() => {
     const fetchAdminData = async () => {
@@ -181,6 +200,12 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [inventory, setInventory] = useState<any[]>([]);
 
   const [customers, setCustomers] = useState<any[]>([]);
+
+  const filteredCustomersForDropdown = useMemo(() => {
+    if (!customerSearchTerm) return [];
+    return customers.filter(c => c.name.toLowerCase().includes(customerSearchTerm.toLowerCase()));
+  }, [customers, customerSearchTerm]);
+
 
   const [invoices, setInvoices] = useState<any[]>([]);
 
@@ -863,45 +888,47 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     </div>
                   </div>
                   {filteredOrdersByDate.length > 0 ? (
-                    <table className="w-full text-left">
-                      <thead className="bg-white">
-                        <tr className="text-[10px] uppercase tracking-widest text-slate-400 font-black border-b border-slate-100">
-                          <th className="px-8 py-5">Cliente</th>
-                          <th className="px-8 py-5">Serviço Especializado</th>
-                          <th className="px-8 py-5">Estado Atual</th>
-                          <th className="px-8 py-5 text-right">Valor Final</th>
-                          <th className="px-8 py-5 text-center">Ações</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-50">
-                        {filteredOrdersByDate.map(o => (
-                          <tr key={o.id} className="hover:bg-brand-50/20 transition-colors group">
-                            <td className="px-8 py-6">
-                              <p className="font-bold text-sm text-dark-900">{o.customer}</p>
-                              <p className="text-[8px] text-slate-400 font-bold uppercase tracking-tighter">ID: {o.id}</p>
-                            </td>
-                            <td className="px-8 py-6">
-                              <p className="text-[10px] text-brand-600 font-black uppercase tracking-widest">{o.service}</p>
-                            </td>
-                            <td className="px-8 py-6">
-                              <span className={`text-[8px] uppercase font-black px-2 py-1 border ${o.status === 'Pronto' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-brand-50 text-brand-600'}`}>{o.status}</span>
-                            </td>
-                            <td className="px-8 py-6 text-right font-serif font-bold text-dark-900 text-base">
-                              R$ {o.value.toFixed(2)}
-                            </td>
-                            <td className="px-8 py-6 text-center">
-                              <button
-                                onClick={() => handleDeleteOrder(o.id)}
-                                className="p-2 text-slate-300 hover:text-red-500 transition-colors"
-                                title="Excluir Ordem"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
-                            </td>
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left">
+                        <thead className="bg-white">
+                          <tr className="text-[10px] uppercase tracking-widest text-slate-400 font-black border-b border-slate-100">
+                            <th className="px-8 py-5">Cliente</th>
+                            <th className="px-8 py-5">Serviço Especializado</th>
+                            <th className="px-8 py-5">Estado Atual</th>
+                            <th className="px-8 py-5 text-right">Valor Final</th>
+                            <th className="px-8 py-5 text-center">Ações</th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                        </thead>
+                        <tbody className="divide-y divide-slate-50">
+                          {filteredOrdersByDate.map(o => (
+                            <tr key={o.id} className="hover:bg-brand-50/20 transition-colors group">
+                              <td className="px-8 py-6">
+                                <p className="font-bold text-sm text-dark-900">{o.customer}</p>
+                                <p className="text-[8px] text-slate-400 font-bold uppercase tracking-tighter">ID: {o.id}</p>
+                              </td>
+                              <td className="px-8 py-6">
+                                <p className="text-[10px] text-brand-600 font-black uppercase tracking-widest">{o.service}</p>
+                              </td>
+                              <td className="px-8 py-6">
+                                <span className={`text-[8px] uppercase font-black px-2 py-1 border ${o.status === 'Pronto' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-brand-50 text-brand-600'}`}>{o.status}</span>
+                              </td>
+                              <td className="px-8 py-6 text-right font-serif font-bold text-dark-900 text-base">
+                                R$ {o.value.toFixed(2)}
+                              </td>
+                              <td className="px-8 py-6 text-center">
+                                <button
+                                  onClick={() => handleDeleteOrder(o.id)}
+                                  className="p-2 text-slate-300 hover:text-red-500 transition-colors"
+                                  title="Excluir Ordem"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                   ) : (
                     <div className="p-16 text-center">
                       <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -915,90 +942,92 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
               </div>
             ) : (
               <div className="bg-white border border-slate-100 shadow-sm overflow-hidden animate-in fade-in duration-500">
-                <table className="w-full text-left">
-                  <thead className="bg-slate-50">
-                    <tr className="text-[10px] uppercase tracking-widest text-slate-400 font-black border-b border-slate-100">
-                      <th className="px-8 py-5">Cliente</th>
-                      <th className="px-8 py-5">Item / Serviço</th>
-                      <th className="px-8 py-5">Status</th>
-                      <th className="px-8 py-5">Entrega Prevista</th>
-                      <th className="px-8 py-5 text-right">Valor</th>
-                      <th className="px-8 py-5 text-center">Ações</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-50">
-                    {filteredOrders.map(o => {
-                      const customer = customers.find(c => c.name === o.customer);
-                      const isInfoSelected = selectedCustomerInfo === o.id;
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left">
+                    <thead className="bg-slate-50">
+                      <tr className="text-[10px] uppercase tracking-widest text-slate-400 font-black border-b border-slate-100">
+                        <th className="px-8 py-5">Cliente</th>
+                        <th className="px-8 py-5">Item / Serviço</th>
+                        <th className="px-8 py-5">Status</th>
+                        <th className="px-8 py-5">Entrega Prevista</th>
+                        <th className="px-8 py-5 text-right">Valor</th>
+                        <th className="px-8 py-5 text-center">Ações</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-50">
+                      {filteredOrders.map(o => {
+                        const customer = customers.find(c => c.name === o.customer);
+                        const isInfoSelected = selectedCustomerInfo === o.id;
 
-                      return (
-                        <tr key={o.id} className="hover:bg-slate-50/50 transition-colors relative group">
-                          <td className="px-8 py-6 relative">
-                            <button
-                              onClick={() => setSelectedCustomerInfo(isInfoSelected ? null : o.id)}
-                              className="font-bold text-sm text-dark-900 hover:text-brand-600 transition-colors flex items-center gap-2 text-left"
-                            >
-                              {o.customer}
-                              <Info className="w-3 h-3 text-slate-300" />
-                            </button>
-                            {isInfoSelected && customer && (
-                              <div className="absolute left-8 top-full z-20 bg-white border border-slate-100 shadow-2xl p-4 min-w-[200px] animate-in slide-in-from-top-2 duration-200">
-                                <div className="flex justify-between items-center mb-2">
-                                  <span className="text-[8px] font-black uppercase tracking-widest text-slate-400">Contato Direto</span>
-                                  <button onClick={() => setSelectedCustomerInfo(null)}><X className="w-3 h-3 text-slate-300 hover:text-red-500" /></button>
-                                </div>
-                                <div className="space-y-2">
-                                  <div className="flex items-center gap-2 text-[10px] text-dark-900 font-medium">
-                                    <Mail className="w-3 h-3 text-brand-600" />
-                                    {customer.email}
+                        return (
+                          <tr key={o.id} className="hover:bg-slate-50/50 transition-colors relative group">
+                            <td className="px-8 py-6 relative">
+                              <button
+                                onClick={() => setSelectedCustomerInfo(isInfoSelected ? null : o.id)}
+                                className="font-bold text-sm text-dark-900 hover:text-brand-600 transition-colors flex items-center gap-2 text-left"
+                              >
+                                {o.customer}
+                                <Info className="w-3 h-3 text-slate-300" />
+                              </button>
+                              {isInfoSelected && customer && (
+                                <div className="absolute left-8 top-full z-20 bg-white border border-slate-100 shadow-2xl p-4 min-w-[200px] animate-in slide-in-from-top-2 duration-200">
+                                  <div className="flex justify-between items-center mb-2">
+                                    <span className="text-[8px] font-black uppercase tracking-widest text-slate-400">Contato Direto</span>
+                                    <button onClick={() => setSelectedCustomerInfo(null)}><X className="w-3 h-3 text-slate-300 hover:text-red-500" /></button>
                                   </div>
-                                  <div className="flex items-center gap-2 text-[10px] text-dark-900 font-medium">
-                                    <Phone className="w-3 h-3 text-brand-600" />
-                                    {customer.phone}
+                                  <div className="space-y-2">
+                                    <div className="flex items-center gap-2 text-[10px] text-dark-900 font-medium">
+                                      <Mail className="w-3 h-3 text-brand-600" />
+                                      {customer.email}
+                                    </div>
+                                    <div className="flex items-center gap-2 text-[10px] text-dark-900 font-medium">
+                                      <Phone className="w-3 h-3 text-brand-600" />
+                                      {customer.phone}
+                                    </div>
+                                  </div>
+                                  <div className="mt-3 pt-2 border-t border-slate-50">
+                                    <span className="text-[8px] font-black uppercase px-2 py-0.5 rounded-full bg-brand-50 text-brand-600">
+                                      {customer.loyalty} Member
+                                    </span>
                                   </div>
                                 </div>
-                                <div className="mt-3 pt-2 border-t border-slate-50">
-                                  <span className="text-[8px] font-black uppercase px-2 py-0.5 rounded-full bg-brand-50 text-brand-600">
-                                    {customer.loyalty} Member
-                                  </span>
-                                </div>
-                              </div>
-                            )}
-                          </td>
-                          <td className="px-8 py-6">
-                            <p className="text-[10px] text-brand-600 font-black uppercase tracking-tighter">{o.service}</p>
-                          </td>
-                          <td className="px-8 py-6">
-                            <select
-                              value={o.status}
-                              onChange={(e) => handleUpdateOrder(o.id, 'status', e.target.value)}
-                              className="bg-transparent border-0 text-[10px] font-black uppercase outline-none cursor-pointer focus:ring-0 p-0"
-                            >
-                              <option>Pendente</option>
-                              <option>Em Restauração</option>
-                              <option>Pronto</option>
-                            </select>
-                          </td>
-                          <td className="px-8 py-6 text-xs text-slate-500 font-medium">
-                            {o.deadline.split('-').reverse().join('/')}
-                          </td>
-                          <td className="px-8 py-6 text-right font-serif font-bold text-dark-900">
-                            R$ {o.value.toFixed(2)}
-                          </td>
-                          <td className="px-8 py-6 text-center">
-                            <button
-                              onClick={() => handleDeleteOrder(o.id)}
-                              className="p-2 text-slate-300 hover:text-red-500 transition-colors"
-                              title="Excluir Ordem"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+                              )}
+                            </td>
+                            <td className="px-8 py-6">
+                              <p className="text-[10px] text-brand-600 font-black uppercase tracking-tighter">{o.service}</p>
+                            </td>
+                            <td className="px-8 py-6">
+                              <select
+                                value={o.status}
+                                onChange={(e) => handleUpdateOrder(o.id, 'status', e.target.value)}
+                                className="bg-transparent border-0 text-[10px] font-black uppercase outline-none cursor-pointer focus:ring-0 p-0"
+                              >
+                                <option>Pendente</option>
+                                <option>Em Restauração</option>
+                                <option>Pronto</option>
+                              </select>
+                            </td>
+                            <td className="px-8 py-6 text-xs text-slate-500 font-medium">
+                              {o.deadline.split('-').reverse().join('/')}
+                            </td>
+                            <td className="px-8 py-6 text-right font-serif font-bold text-dark-900">
+                              R$ {o.value.toFixed(2)}
+                            </td>
+                            <td className="px-8 py-6 text-center">
+                              <button
+                                onClick={() => handleDeleteOrder(o.id)}
+                                className="p-2 text-slate-300 hover:text-red-500 transition-colors"
+                                title="Excluir Ordem"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             )}
           </div>
@@ -1095,70 +1124,72 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
               </div>
 
               <div className="bg-white border border-slate-100 shadow-2xl overflow-hidden">
-                <table className="w-full text-left">
-                  <thead className="bg-slate-50 border-b border-slate-100">
-                    <tr className="text-[10px] uppercase tracking-widest text-slate-400 font-black">
-                      <th className="px-10 py-6">Natureza / Origem</th>
-                      <th className="px-10 py-6">Canal de Recebimento</th>
-                      <th className="px-10 py-6">Cronologia</th>
-                      <th className="px-10 py-6 text-center">Status Ativo</th>
-                      <th className="px-10 py-6 text-right">Valor Líquido</th>
-                      <th className="px-10 py-6 text-center">Ações</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-50">
-                    {filteredByStatus.map(t => (
-                      <tr key={t.id} className="hover:bg-brand-50/20 transition-all duration-300 group animate-in fade-in slide-in-from-left-2">
-                        <td className="px-10 py-7">
-                          <div className="flex items-center gap-5">
-                            <div className={`w-10 h-10 rounded-full flex items-center justify-center shadow-sm ${t.type === 'Entrada' ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'}`}>
-                              {t.type === 'Entrada' ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
-                            </div>
-                            <div>
-                              <p className="font-bold text-sm text-dark-900 leading-tight">{t.desc}</p>
-                              <span className="text-[9px] font-black uppercase text-slate-400 tracking-tighter">ID Transação: {Math.floor(Math.random() * 1000000)}</span>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-10 py-7">
-                          <div className="flex items-center gap-3">
-                            <CreditCard className="w-3.5 h-3.5 text-brand-600" />
-                            <span className="text-[10px] text-dark-900 font-black uppercase tracking-widest">{t.method}</span>
-                          </div>
-                        </td>
-                        <td className="px-10 py-7">
-                          <div className="flex flex-col">
-                            <span className="text-[10px] font-bold text-dark-800">{t.date.split(',')[0]}</span>
-                            <span className="text-[9px] text-slate-400 italic">{t.date.split(',')[1]}</span>
-                          </div>
-                        </td>
-                        <td className="px-10 py-7 text-center">
-                          <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 text-emerald-600 text-[8px] font-black uppercase rounded-full border border-emerald-100">
-                            <CheckCircle2 className="w-2.5 h-2.5" /> {t.status}
-                          </span>
-                        </td>
-                        <td className={`px-10 py-7 text-right font-serif font-bold text-base ${t.type === 'Entrada' ? 'text-emerald-600' : 'text-dark-900'}`}>
-                          {t.type === 'Entrada' ? '+' : '-'} R$ {t.value.toFixed(2)}
-                        </td>
-                        <td className="px-10 py-7 text-center">
-                          <div className="flex justify-center gap-2">
-                            <label className="p-2.5 bg-slate-50 text-slate-400 hover:bg-dark-900 hover:text-white transition-all cursor-pointer shadow-sm rounded-sm">
-                              <Paperclip className="w-3.5 h-3.5" />
-                              <input type="file" className="hidden" />
-                            </label>
-                            <button
-                              onClick={() => handleDeleteTransaction(t.id)}
-                              className="p-2.5 bg-slate-50 text-slate-400 hover:bg-red-500 hover:text-white transition-all shadow-sm rounded-sm"
-                              title="Excluir Transação"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        </td>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left">
+                    <thead className="bg-slate-50 border-b border-slate-100">
+                      <tr className="text-[10px] uppercase tracking-widest text-slate-400 font-black">
+                        <th className="px-10 py-6">Natureza / Origem</th>
+                        <th className="px-10 py-6">Canal de Recebimento</th>
+                        <th className="px-10 py-6">Cronologia</th>
+                        <th className="px-10 py-6 text-center">Status Ativo</th>
+                        <th className="px-10 py-6 text-right">Valor Líquido</th>
+                        <th className="px-10 py-6 text-center">Ações</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody className="divide-y divide-slate-50">
+                      {filteredByStatus.map(t => (
+                        <tr key={t.id} className="hover:bg-brand-50/20 transition-all duration-300 group animate-in fade-in slide-in-from-left-2">
+                          <td className="px-10 py-7">
+                            <div className="flex items-center gap-5">
+                              <div className={`w-10 h-10 rounded-full flex items-center justify-center shadow-sm ${t.type === 'Entrada' ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'}`}>
+                                {t.type === 'Entrada' ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
+                              </div>
+                              <div>
+                                <p className="font-bold text-sm text-dark-900 leading-tight">{t.desc}</p>
+                                <span className="text-[9px] font-black uppercase text-slate-400 tracking-tighter">ID Transação: {Math.floor(Math.random() * 1000000)}</span>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-10 py-7">
+                            <div className="flex items-center gap-3">
+                              <CreditCard className="w-3.5 h-3.5 text-brand-600" />
+                              <span className="text-[10px] text-dark-900 font-black uppercase tracking-widest">{t.method}</span>
+                            </div>
+                          </td>
+                          <td className="px-10 py-7">
+                            <div className="flex flex-col">
+                              <span className="text-[10px] font-bold text-dark-800">{t.date.split(',')[0]}</span>
+                              <span className="text-[9px] text-slate-400 italic">{t.date.split(',')[1]}</span>
+                            </div>
+                          </td>
+                          <td className="px-10 py-7 text-center">
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 text-emerald-600 text-[8px] font-black uppercase rounded-full border border-emerald-100">
+                              <CheckCircle2 className="w-2.5 h-2.5" /> {t.status}
+                            </span>
+                          </td>
+                          <td className={`px-10 py-7 text-right font-serif font-bold text-base ${t.type === 'Entrada' ? 'text-emerald-600' : 'text-dark-900'}`}>
+                            {t.type === 'Entrada' ? '+' : '-'} R$ {t.value.toFixed(2)}
+                          </td>
+                          <td className="px-10 py-7 text-center">
+                            <div className="flex justify-center gap-2">
+                              <label className="p-2.5 bg-slate-50 text-slate-400 hover:bg-dark-900 hover:text-white transition-all cursor-pointer shadow-sm rounded-sm">
+                                <Paperclip className="w-3.5 h-3.5" />
+                                <input type="file" className="hidden" />
+                              </label>
+                              <button
+                                onClick={() => handleDeleteTransaction(t.id)}
+                                className="p-2.5 bg-slate-50 text-slate-400 hover:bg-red-500 hover:text-white transition-all shadow-sm rounded-sm"
+                                title="Excluir Transação"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
           </div>
@@ -1557,18 +1588,25 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
               <div className="space-y-8">
                 <h3 className="text-[10px] font-black uppercase tracking-widest text-brand-600 border-b border-brand-50 pb-2">Horários de Funcionamento</h3>
                 <div className="space-y-6">
-                  <div className="space-y-1">
-                    <label className="text-[10px] uppercase font-black text-slate-400 tracking-widest">Segunda a Sexta</label>
-                    <input type="text" value={businessHours.monFri} onChange={(e) => setBusinessHours({ ...businessHours, monFri: e.target.value })} className="w-full bg-slate-50 border border-slate-100 p-4 text-sm font-bold outline-none focus:ring-2 focus:ring-brand-600" />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[10px] uppercase font-black text-slate-400 tracking-widest">Sábado</label>
-                    <input type="text" value={businessHours.sat} onChange={(e) => setBusinessHours({ ...businessHours, sat: e.target.value })} className="w-full bg-slate-50 border border-slate-100 p-4 text-sm font-bold outline-none focus:ring-2 focus:ring-brand-600" />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[10px] uppercase font-black text-slate-400 tracking-widest">Domingo</label>
-                    <input type="text" value={businessHours.sun} onChange={(e) => setBusinessHours({ ...businessHours, sun: e.target.value })} className="w-full bg-slate-50 border border-slate-100 p-4 text-sm font-bold outline-none focus:ring-2 focus:ring-brand-600" />
-                  </div>
+                  {[
+                    { key: 'seg', label: 'Segunda-feira' },
+                    { key: 'ter', label: 'Terça-feira' },
+                    { key: 'qua', label: 'Quarta-feira' },
+                    { key: 'qui', label: 'Quinta-feira' },
+                    { key: 'sex', label: 'Sexta-feira' },
+                    { key: 'sab', label: 'Sábado' },
+                    { key: 'dom', label: 'Domingo' }
+                  ].map(day => (
+                    <div key={day.key} className="space-y-1">
+                      <label className="text-[10px] uppercase font-black text-slate-400 tracking-widest">{day.label}</label>
+                      <input
+                        type="text"
+                        value={businessHours[day.key] || ''}
+                        onChange={(e) => setBusinessHours({ ...businessHours, [day.key]: e.target.value })}
+                        className="w-full bg-slate-50 border border-slate-100 p-4 text-sm font-bold outline-none focus:ring-2 focus:ring-brand-600"
+                      />
+                    </div>
+                  ))}
                 </div>
               </div>
 
@@ -1678,15 +1716,15 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
         {modalType && (
           <div className="fixed inset-0 bg-dark-900/80 backdrop-blur-md z-[100] flex items-center justify-center p-6 animate-in fade-in duration-300">
-            <div className="bg-white w-full max-w-lg shadow-2xl overflow-hidden animate-in zoom-in-95 duration-500">
-              <div className="p-8 bg-dark-900 text-white flex justify-between items-center">
+            <div className="bg-white w-[calc(100%-2rem)] max-w-lg max-h-[90vh] overflow-y-auto no-scrollbar shadow-2xl overflow-hidden animate-in zoom-in-95 duration-500">
+              <div className="p-6 md:p-8 bg-dark-900 text-white flex justify-between items-center sticky top-0 z-10">
                 <div>
                   <h4 className="text-[9px] font-black uppercase tracking-widest text-brand-400 mb-1">Módulo Sincronizado</h4>
                   <h2 className="font-serif text-2xl italic">{modalType}</h2>
                 </div>
                 <button onClick={() => setModalType(null)} className="p-2 hover:bg-white/10 transition-colors"><X className="w-6 h-6" /></button>
               </div>
-              <div className="p-10">
+              <div className="p-6 md:p-10">
                 <form onSubmit={handleNewRegistration} className="space-y-6">
                   {modalType === 'Novo Pedido Presencial' && (
                     <div className="space-y-4">
@@ -1706,15 +1744,76 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         <p className="text-[9px] text-brand-600 mt-1">Geração automática de ordem e vínculo de perfil.</p>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-1"><label className="text-[9px] uppercase font-black text-slate-400 tracking-widest">Nome Completo</label><input name="name" required className="w-full bg-slate-50 border border-slate-100 p-4 text-xs font-bold" /></div>
-                        <div className="space-y-1"><label className="text-[9px] uppercase font-black text-slate-400 tracking-widest">WhatsApp/Tel</label><input name="phone" required className="w-full bg-slate-50 border border-slate-100 p-4 text-xs font-bold" placeholder="(13) 99999-9999" /></div>
+                        <div className="space-y-1 relative" onClick={(e) => e.stopPropagation()}>
+                          <label className="text-[9px] uppercase font-black text-slate-400 tracking-widest">Busca / Nome Completo</label>
+                          <input
+                            name="name"
+                            required
+                            autoComplete="off"
+                            value={customerSearchTerm}
+                            onChange={(e) => {
+                              setCustomerSearchTerm(e.target.value);
+                              setSelectedCustomerForOrder(null);
+                              setIsCustomerDropdownOpen(true);
+                            }}
+                            onFocus={() => setIsCustomerDropdownOpen(true)}
+                            placeholder="Digite para buscar..."
+                            className="w-full bg-slate-50 border border-slate-100 p-4 text-xs font-bold focus:ring-1 focus:ring-brand-600 outline-none"
+                          />
+                          {isCustomerDropdownOpen && customerSearchTerm.length > 0 && (
+                            <ul className="absolute top-full left-0 right-0 max-h-48 overflow-y-auto bg-white border border-slate-100 shadow-xl z-[150] no-scrollbar">
+                              {filteredCustomersForDropdown.length > 0 ? (
+                                filteredCustomersForDropdown.map(c => (
+                                  <li
+                                    key={c.id}
+                                    className="p-3 text-xs font-bold text-dark-900 border-b border-slate-50 hover:bg-brand-50 hover:text-brand-600 cursor-pointer transition-colors"
+                                    onClick={() => {
+                                      setCustomerSearchTerm(c.name);
+                                      setSelectedCustomerForOrder(c);
+                                      setOrderPhoneStr(c.phone !== 'n/a' ? c.phone : '');
+                                      setOrderEmailStr(c.email !== 'n/a' ? c.email : '');
+                                      setIsCustomerDropdownOpen(false);
+                                    }}
+                                  >
+                                    {c.name}
+                                    <span className="block text-[9px] text-slate-400 font-normal mt-0.5">{c.phone !== 'n/a' ? c.phone : 'Sem número'}</span>
+                                  </li>
+                                ))
+                              ) : (
+                                <li className="p-3 text-[10px] text-slate-400 font-bold uppercase tracking-widest text-center">
+                                  Cadastrar como novo cliente
+                                </li>
+                              )}
+                            </ul>
+                          )}
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[9px] uppercase font-black text-slate-400 tracking-widest">WhatsApp/Tel</label>
+                          <input
+                            name="phone"
+                            value={orderPhoneStr}
+                            onChange={(e) => setOrderPhoneStr(e.target.value)}
+                            required
+                            className="w-full bg-slate-50 border border-slate-100 p-4 text-xs font-bold focus:ring-1 focus:ring-brand-600 outline-none"
+                            placeholder="(13) 99999-9999"
+                          />
+                        </div>
                       </div>
+                      <div className="space-y-1">
+                        <label className="text-[9px] uppercase font-black text-slate-400 tracking-widest">Email (Opcional)</label>
+                        <input
+                          name="email"
+                          value={orderEmailStr}
+                          onChange={(e) => setOrderEmailStr(e.target.value)}
+                          className="w-full bg-slate-50 border border-slate-100 p-4 text-xs font-bold focus:ring-1 focus:ring-brand-600 outline-none"
+                        />
+                      </div>
+                      <div className="space-y-1"><label className="text-[9px] uppercase font-black text-slate-400 tracking-widest">Serviço Solicitado</label><input name="service" required className="w-full bg-slate-50 border border-slate-100 p-4 text-xs font-bold" /></div>
                       <div className="space-y-1"><label className="text-[9px] uppercase font-black text-slate-400 tracking-widest">Serviço Solicitado</label><input name="service" required className="w-full bg-slate-50 border border-slate-100 p-4 text-xs font-bold" /></div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-1"><label className="text-[9px] uppercase font-black text-slate-400 tracking-widest">Valor Acordado (R$)</label><input name="value" type="number" step="0.01" required className="w-full bg-slate-50 border border-slate-100 p-4 text-xs font-bold" /></div>
                         <div className="space-y-1"><label className="text-[9px] uppercase font-black text-slate-400 tracking-widest">Data de Entrega</label><input name="deadline" type="date" required className="w-full bg-slate-50 border border-slate-100 p-4 text-xs font-bold" /></div>
                       </div>
-                      <div className="space-y-1"><label className="text-[9px] uppercase font-black text-slate-400 tracking-widest">Email (Opcional)</label><input name="email" className="w-full bg-slate-50 border border-slate-100 p-4 text-xs font-bold" /></div>
                     </div>
                   )}
 
@@ -1790,7 +1889,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         <label className="text-[9px] uppercase font-black text-slate-400 tracking-widest">Descrição da Operação</label>
                         <input name="desc" required placeholder="Ex: Venda Direta ou Manutenção Reparos" className="w-full bg-slate-50 border border-slate-100 p-4 text-xs font-bold outline-none focus:ring-1 focus:ring-brand-600" />
                       </div>
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-1">
                           <label className="text-[9px] uppercase font-black text-slate-400 tracking-widest">Valor Líquido (R$)</label>
                           <input name="value" type="number" step="0.01" required placeholder="0.00" className="w-full bg-slate-50 border border-slate-100 p-4 text-xs font-bold outline-none focus:ring-1 focus:ring-brand-600" />
@@ -1820,11 +1919,11 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   {modalType === 'Novo Insumo' && (
                     <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2 no-scrollbar">
                       <div className="space-y-1"><label className="text-[9px] uppercase font-black text-slate-400 tracking-widest">Nome do Insumo/Produto</label><input name="name" required className="w-full bg-slate-50 border border-slate-100 p-4 text-xs font-bold" /></div>
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-1"><label className="text-[9px] uppercase font-black text-slate-400 tracking-widest">SKU/Ref</label><input name="sku" required className="w-full bg-slate-50 border border-slate-100 p-4 text-xs font-bold" /></div>
                         <div className="space-y-1"><label className="text-[9px] uppercase font-black text-slate-400 tracking-widest">Preço Un. (R$)</label><input name="price" type="number" step="0.01" required className="w-full bg-slate-50 border border-slate-100 p-4 text-xs font-bold" /></div>
                       </div>
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-1"><label className="text-[9px] uppercase font-black text-slate-400 tracking-widest">Estoque Inicial</label><input name="stock" type="number" required className="w-full bg-slate-50 border border-slate-100 p-4 text-xs font-bold" /></div>
                         <div className="space-y-1"><label className="text-[9px] uppercase font-black text-slate-400 tracking-widest">Tipo</label>
                           <select name="type" className="w-full bg-slate-50 border border-slate-100 p-4 text-xs font-bold outline-none">
