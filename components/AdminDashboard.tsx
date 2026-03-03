@@ -122,6 +122,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
   });
 
   const [isSavingSettings, setIsSavingSettings] = useState(false);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [isModalLoading, setIsModalLoading] = useState(false);
   const [viewingInvoice, setViewingInvoice] = useState<any | null>(null);
   const [isEditingInvoice, setIsEditingInvoice] = useState(false);
@@ -204,6 +205,36 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
       alert('Erro ao salvar no Supabase.');
     } finally {
       setIsSavingSettings(false);
+    }
+  };
+
+  const handleHeroImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploadingImage(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `hero-${Date.now()}.${fileExt}`;
+      const filePath = `hero/${fileName}`;
+
+      const { data, error: uploadError } = await supabase.storage
+        .from('landing-assets')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('landing-assets')
+        .getPublicUrl(filePath);
+
+      setLandingPage(prev => ({ ...prev, heroImage: publicUrl }));
+      alert('Imagem enviada com sucesso! Não esqueça de clicar em "Salvar" no final da página.');
+    } catch (err: any) {
+      console.error(err);
+      alert('Erro ao fazer upload da imagem: ' + (err.message || 'Verifique se você rodou o script SQL para criar o bucket.'));
+    } finally {
+      setIsUploadingImage(false);
     }
   };
 
@@ -1723,8 +1754,42 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     <input type="text" value={landingPage.heroSubtitle} onChange={(e) => setLandingPage({ ...landingPage, heroSubtitle: e.target.value })} className="w-full bg-slate-50 border border-slate-100 p-4 text-sm font-bold outline-none focus:ring-2 focus:ring-brand-600" />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[10px] uppercase font-black text-slate-400 tracking-widest">URL Imagem Hero</label>
-                    <input type="text" value={landingPage.heroImage} onChange={(e) => setLandingPage({ ...landingPage, heroImage: e.target.value })} className="w-full bg-slate-50 border border-slate-100 p-4 text-sm font-bold outline-none focus:ring-2 focus:ring-brand-600" />
+                    <label className="text-[10px] uppercase font-black text-slate-400 tracking-widest">Imagem de Fundo (Hero)</label>
+                    <div className="mt-2 space-y-4">
+                      {landingPage.heroImage && (
+                        <div className="relative group w-full h-40 bg-slate-100 border border-slate-200 overflow-hidden">
+                          <img src={landingPage.heroImage} alt="Preview Hero" className="w-full h-full object-cover" />
+                          <div className="absolute inset-0 bg-dark-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <span className="text-[8px] text-white font-black uppercase tracking-widest">Preview Atual</span>
+                          </div>
+                        </div>
+                      )}
+
+                      <label className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-slate-200 rounded-lg cursor-pointer hover:border-brand-600 hover:bg-slate-50 transition-all ${isUploadingImage ? 'opacity-50 pointer-events-none' : ''}`}>
+                        <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                          {isUploadingImage ? (
+                            <Loader2 className="w-8 h-8 text-brand-600 animate-spin" />
+                          ) : (
+                            <>
+                              <ImageIcon className="w-8 h-8 text-slate-400 mb-3" />
+                              <p className="mb-2 text-[10px] text-slate-500 font-bold uppercase tracking-widest">Clique para subir nova imagem</p>
+                              <p className="text-[8px] text-slate-400 font-black uppercase tracking-widest">PNG, JPG ou WEBP (Max. 5MB)</p>
+                            </>
+                          )}
+                        </div>
+                        <input type="file" className="hidden" accept="image/*" onChange={handleHeroImageUpload} disabled={isUploadingImage} />
+                      </label>
+
+                      <div className="space-y-1">
+                        <label className="text-[8px] uppercase font-black text-slate-400 tracking-widest">URL da Imagem (Opcional)</label>
+                        <input
+                          type="text"
+                          value={landingPage.heroImage}
+                          onChange={(e) => setLandingPage({ ...landingPage, heroImage: e.target.value })}
+                          className="w-full bg-slate-50 border border-slate-100 p-3 text-[10px] font-bold outline-none focus:ring-1 focus:ring-brand-600"
+                        />
+                      </div>
+                    </div>
                   </div>
 
                   <div className="h-4" />
