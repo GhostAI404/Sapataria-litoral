@@ -87,6 +87,22 @@ function App() {
     };
   }, []);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.key.toLowerCase() === 'l') {
+        e.preventDefault();
+        if (user) {
+          setView(prev => prev === 'admin' ? 'home' : 'admin');
+        } else {
+          setIsAuthOpen(true);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [user]);
+
   // Estados para controle de exibição (Ver Mais/Menos)
   const [visibleAtelie, setVisibleAtelie] = useState(4);
   const [visibleBoutique, setVisibleBoutique] = useState(4);
@@ -197,12 +213,7 @@ function App() {
           <div className="flex items-center justify-between h-20">
 
             <div className="flex items-center gap-6">
-              <button
-                onClick={() => user ? setView('admin') : setIsAuthOpen(true)}
-                className={`p-2 transition-all border rounded-full flex items-center justify-center group ${user ? 'bg-luxury-gold text-white border-luxury-gold shadow-md' : 'text-slate-300 hover:text-luxury-brown hover:border-luxury-brown border-slate-100'}`}
-              >
-                <LayoutDashboardIcon className="w-4 h-4" />
-              </button>
+
 
               <div className="flex flex-col items-start cursor-pointer group" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
                 <div className="text-2xl md:text-3xl font-serif font-bold text-dark-900 tracking-tight group-hover:text-luxury-brown transition-colors uppercase italic leading-none">
