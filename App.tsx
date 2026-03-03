@@ -59,8 +59,8 @@ function App() {
         const hours = data.find(s => s.key === 'business_hours')?.value;
         const landing = data.find(s => s.key === 'landing_page')?.value;
         const phone = data.find(s => s.key === 'contact_phone')?.value;
-        if (hours) setBusinessHours(hours);
-        if (landing) setLandingPage(landing);
+        if (hours) setBusinessHours(prev => ({ ...prev, ...hours }));
+        if (landing) setLandingPage(prev => ({ ...prev, ...landing }));
         if (phone) setContactPhone(phone);
       }
     };

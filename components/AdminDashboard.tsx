@@ -174,8 +174,8 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
         const hours = settingsData.find(s => s.key === 'business_hours')?.value;
         const landing = settingsData.find(s => s.key === 'landing_page')?.value;
         const phone = settingsData.find(s => s.key === 'contact_phone')?.value;
-        if (hours) setBusinessHours(hours);
-        if (landing) setLandingPage(landing);
+        if (hours) setBusinessHours(prev => ({ ...prev, ...hours }));
+        if (landing) setLandingPage(prev => ({ ...prev, ...landing }));
         if (phone) setContactPhone(phone);
       }
     };
@@ -186,23 +186,19 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const handleSaveSettings = async () => {
     setIsSavingSettings(true);
     try {
-      const { error: hoursError } = await supabase
+      const { error } = await supabase
         .from('settings')
-        .upsert({ key: 'business_hours', value: businessHours });
+        .upsert([
+          { key: 'business_hours', value: businessHours },
+          { key: 'landing_page', value: landingPage },
+          { key: 'contact_phone', value: contactPhone }
+        ], { onConflict: 'key' });
 
-      const { error: landingError } = await supabase
-        .from('settings')
-        .upsert({ key: 'landing_page', value: landingPage });
-
-      const { error: phoneError } = await supabase
-        .from('settings')
-        .upsert({ key: 'contact_phone', value: contactPhone });
-
-      if (hoursError || landingError || phoneError) throw new Error('Erro ao salvar configurações');
+      if (error) throw error;
       alert('Configurações salvas com sucesso!');
-    } catch (err) {
-      console.error(err);
-      alert('Erro ao salvar no Supabase.');
+    } catch (err: any) {
+      console.error('Erro ao salvar no Supabase:', err);
+      alert('Erro ao salvar no Supabase: ' + (err.message || 'Erro desconhecido. Verifique as políticas de RLS ou a conexão.'));
     } finally {
       setIsSavingSettings(false);
     }
@@ -1797,11 +1793,11 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-1">
                       <label className="text-[10px] uppercase font-black text-slate-400 tracking-widest">Título</label>
-                      <input type="text" value={landingPage.atelieTitle} onChange={(e) => setLandingPage({ ...landingPage, atelieTitle: e.target.value })} className="w-full bg-slate-50 border border-slate-100 p-4 text-sm font-bold outline-none focus:ring-2 focus:ring-brand-600" />
+                      <input type="text" value={landingPage.atelieTitle} onChange={(e) => setLandingPage(prev => ({ ...prev, atelieTitle: e.target.value }))} className="w-full bg-slate-50 border border-slate-100 p-4 text-sm font-bold outline-none focus:ring-2 focus:ring-brand-600" />
                     </div>
                     <div className="space-y-1">
                       <label className="text-[10px] uppercase font-black text-slate-400 tracking-widest">Subtítulo</label>
-                      <input type="text" value={landingPage.atelieSubtitle} onChange={(e) => setLandingPage({ ...landingPage, atelieSubtitle: e.target.value })} className="w-full bg-slate-50 border border-slate-100 p-4 text-sm font-bold outline-none focus:ring-2 focus:ring-brand-600" />
+                      <input type="text" value={landingPage.atelieSubtitle} onChange={(e) => setLandingPage(prev => ({ ...prev, atelieSubtitle: e.target.value }))} className="w-full bg-slate-50 border border-slate-100 p-4 text-sm font-bold outline-none focus:ring-2 focus:ring-brand-600" />
                     </div>
                   </div>
 
@@ -1810,16 +1806,16 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-1">
                       <label className="text-[10px] uppercase font-black text-slate-400 tracking-widest">Título</label>
-                      <input type="text" value={landingPage.boutiqueTitle} onChange={(e) => setLandingPage({ ...landingPage, boutiqueTitle: e.target.value })} className="w-full bg-slate-50 border border-slate-100 p-4 text-sm font-bold outline-none focus:ring-2 focus:ring-brand-600" />
+                      <input type="text" value={landingPage.boutiqueTitle} onChange={(e) => setLandingPage(prev => ({ ...prev, boutiqueTitle: e.target.value }))} className="w-full bg-slate-50 border border-slate-100 p-4 text-sm font-bold outline-none focus:ring-2 focus:ring-brand-600" />
                     </div>
                     <div className="space-y-1">
                       <label className="text-[10px] uppercase font-black text-slate-400 tracking-widest">Subtítulo</label>
-                      <input type="text" value={landingPage.boutiqueSubtitle} onChange={(e) => setLandingPage({ ...landingPage, boutiqueSubtitle: e.target.value })} className="w-full bg-slate-50 border border-slate-100 p-4 text-sm font-bold outline-none focus:ring-2 focus:ring-brand-600" />
+                      <input type="text" value={landingPage.boutiqueSubtitle} onChange={(e) => setLandingPage(prev => ({ ...prev, boutiqueSubtitle: e.target.value }))} className="w-full bg-slate-50 border border-slate-100 p-4 text-sm font-bold outline-none focus:ring-2 focus:ring-brand-600" />
                     </div>
                   </div>
                   <div className="space-y-1">
                     <label className="text-[10px] uppercase font-black text-slate-400 tracking-widest">Descrição</label>
-                    <textarea value={landingPage.boutiqueDesc} onChange={(e) => setLandingPage({ ...landingPage, boutiqueDesc: e.target.value })} className="w-full bg-slate-50 border border-slate-100 p-4 text-sm font-bold outline-none focus:ring-2 focus:ring-brand-600 h-20 resize-none" />
+                    <textarea value={landingPage.boutiqueDesc} onChange={(e) => setLandingPage(prev => ({ ...prev, boutiqueDesc: e.target.value }))} className="w-full bg-slate-50 border border-slate-100 p-4 text-sm font-bold outline-none focus:ring-2 focus:ring-brand-600 h-20 resize-none" />
                   </div>
 
                   <div className="h-4" />
@@ -1827,16 +1823,16 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-1">
                       <label className="text-[10px] uppercase font-black text-slate-400 tracking-widest">Título</label>
-                      <input type="text" value={landingPage.cutelariaTitle} onChange={(e) => setLandingPage({ ...landingPage, cutelariaTitle: e.target.value })} className="w-full bg-slate-50 border border-slate-100 p-4 text-sm font-bold outline-none focus:ring-2 focus:ring-brand-600" />
+                      <input type="text" value={landingPage.cutelariaTitle} onChange={(e) => setLandingPage(prev => ({ ...prev, cutelariaTitle: e.target.value }))} className="w-full bg-slate-50 border border-slate-100 p-4 text-sm font-bold outline-none focus:ring-2 focus:ring-brand-600" />
                     </div>
                     <div className="space-y-1">
                       <label className="text-[10px] uppercase font-black text-slate-400 tracking-widest">Subtítulo</label>
-                      <input type="text" value={landingPage.cutelariaSubtitle} onChange={(e) => setLandingPage({ ...landingPage, cutelariaSubtitle: e.target.value })} className="w-full bg-slate-50 border border-slate-100 p-4 text-sm font-bold outline-none focus:ring-2 focus:ring-brand-600" />
+                      <input type="text" value={landingPage.cutelariaSubtitle} onChange={(e) => setLandingPage(prev => ({ ...prev, cutelariaSubtitle: e.target.value }))} className="w-full bg-slate-50 border border-slate-100 p-4 text-sm font-bold outline-none focus:ring-2 focus:ring-brand-600" />
                     </div>
                   </div>
                   <div className="space-y-1">
                     <label className="text-[10px] uppercase font-black text-slate-400 tracking-widest">Descrição</label>
-                    <textarea value={landingPage.cutelariaDesc} onChange={(e) => setLandingPage({ ...landingPage, cutelariaDesc: e.target.value })} className="w-full bg-slate-50 border border-slate-100 p-4 text-sm font-bold outline-none focus:ring-2 focus:ring-brand-600 h-20 resize-none" />
+                    <textarea value={landingPage.cutelariaDesc} onChange={(e) => setLandingPage(prev => ({ ...prev, cutelariaDesc: e.target.value }))} className="w-full bg-slate-50 border border-slate-100 p-4 text-sm font-bold outline-none focus:ring-2 focus:ring-brand-600 h-20 resize-none" />
                   </div>
                 </div>
               </div>
