@@ -110,7 +110,15 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [landingPage, setLandingPage] = useState({
     heroTitle: 'Restauração de Alta Classe',
     heroSubtitle: 'Maestria Sapataria Litoral',
-    heroImage: 'https://images.unsplash.com/photo-1449241717754-993d087b32c1?auto=format&fit=crop&q=80&w=2000'
+    heroImage: 'https://images.unsplash.com/photo-1449241717754-993d087b32c1?auto=format&fit=crop&q=80&w=2000',
+    atelieTitle: 'Serviços de Ateliê',
+    atelieSubtitle: 'Especialidades',
+    boutiqueTitle: 'Boutique',
+    boutiqueSubtitle: 'Curadoria',
+    boutiqueDesc: 'Obras em couro nobre destinadas àqueles que valorizam a eternidade.',
+    cutelariaTitle: 'Cutelaria',
+    cutelariaSubtitle: 'Peças de Autor',
+    cutelariaDesc: 'Aço forjado em fogo sagrado. Precisão absoluta para o mestre de cozinha.'
   });
 
   const [isSavingSettings, setIsSavingSettings] = useState(false);
@@ -1717,6 +1725,53 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   <div className="space-y-1">
                     <label className="text-[10px] uppercase font-black text-slate-400 tracking-widest">URL Imagem Hero</label>
                     <input type="text" value={landingPage.heroImage} onChange={(e) => setLandingPage({ ...landingPage, heroImage: e.target.value })} className="w-full bg-slate-50 border border-slate-100 p-4 text-sm font-bold outline-none focus:ring-2 focus:ring-brand-600" />
+                  </div>
+
+                  <div className="h-4" />
+                  <h4 className="text-[8px] font-black uppercase text-slate-300 tracking-[0.3em] border-b border-slate-50 pb-2">Seção Ateliê</h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <label className="text-[10px] uppercase font-black text-slate-400 tracking-widest">Título</label>
+                      <input type="text" value={landingPage.atelieTitle} onChange={(e) => setLandingPage({ ...landingPage, atelieTitle: e.target.value })} className="w-full bg-slate-50 border border-slate-100 p-4 text-sm font-bold outline-none focus:ring-2 focus:ring-brand-600" />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] uppercase font-black text-slate-400 tracking-widest">Subtítulo</label>
+                      <input type="text" value={landingPage.atelieSubtitle} onChange={(e) => setLandingPage({ ...landingPage, atelieSubtitle: e.target.value })} className="w-full bg-slate-50 border border-slate-100 p-4 text-sm font-bold outline-none focus:ring-2 focus:ring-brand-600" />
+                    </div>
+                  </div>
+
+                  <div className="h-4" />
+                  <h4 className="text-[8px] font-black uppercase text-slate-300 tracking-[0.3em] border-b border-slate-50 pb-2">Seção Boutique</h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <label className="text-[10px] uppercase font-black text-slate-400 tracking-widest">Título</label>
+                      <input type="text" value={landingPage.boutiqueTitle} onChange={(e) => setLandingPage({ ...landingPage, boutiqueTitle: e.target.value })} className="w-full bg-slate-50 border border-slate-100 p-4 text-sm font-bold outline-none focus:ring-2 focus:ring-brand-600" />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] uppercase font-black text-slate-400 tracking-widest">Subtítulo</label>
+                      <input type="text" value={landingPage.boutiqueSubtitle} onChange={(e) => setLandingPage({ ...landingPage, boutiqueSubtitle: e.target.value })} className="w-full bg-slate-50 border border-slate-100 p-4 text-sm font-bold outline-none focus:ring-2 focus:ring-brand-600" />
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] uppercase font-black text-slate-400 tracking-widest">Descrição</label>
+                    <textarea value={landingPage.boutiqueDesc} onChange={(e) => setLandingPage({ ...landingPage, boutiqueDesc: e.target.value })} className="w-full bg-slate-50 border border-slate-100 p-4 text-sm font-bold outline-none focus:ring-2 focus:ring-brand-600 h-20 resize-none" />
+                  </div>
+
+                  <div className="h-4" />
+                  <h4 className="text-[8px] font-black uppercase text-slate-300 tracking-[0.3em] border-b border-slate-50 pb-2">Seção Cutelaria</h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <label className="text-[10px] uppercase font-black text-slate-400 tracking-widest">Título</label>
+                      <input type="text" value={landingPage.cutelariaTitle} onChange={(e) => setLandingPage({ ...landingPage, cutelariaTitle: e.target.value })} className="w-full bg-slate-50 border border-slate-100 p-4 text-sm font-bold outline-none focus:ring-2 focus:ring-brand-600" />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] uppercase font-black text-slate-400 tracking-widest">Subtítulo</label>
+                      <input type="text" value={landingPage.cutelariaSubtitle} onChange={(e) => setLandingPage({ ...landingPage, cutelariaSubtitle: e.target.value })} className="w-full bg-slate-50 border border-slate-100 p-4 text-sm font-bold outline-none focus:ring-2 focus:ring-brand-600" />
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] uppercase font-black text-slate-400 tracking-widest">Descrição</label>
+                    <textarea value={landingPage.cutelariaDesc} onChange={(e) => setLandingPage({ ...landingPage, cutelariaDesc: e.target.value })} className="w-full bg-slate-50 border border-slate-100 p-4 text-sm font-bold outline-none focus:ring-2 focus:ring-brand-600 h-20 resize-none" />
                   </div>
                 </div>
               </div>

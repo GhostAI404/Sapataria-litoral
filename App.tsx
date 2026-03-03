@@ -123,7 +123,15 @@ function App() {
   const [landingPage, setLandingPage] = useState({
     heroTitle: 'Restauração de Alta Classe',
     heroSubtitle: 'Maestria Sapataria Litoral',
-    heroImage: '/hero-atelier.jpg'
+    heroImage: '/hero-atelier.jpg',
+    atelieTitle: 'Serviços de Ateliê',
+    atelieSubtitle: 'Especialidades',
+    boutiqueTitle: 'Boutique',
+    boutiqueSubtitle: 'Curadoria',
+    boutiqueDesc: 'Obras em couro nobre destinadas àqueles que valorizam a eternidade.',
+    cutelariaTitle: 'Cutelaria',
+    cutelariaSubtitle: 'Peças de Autor',
+    cutelariaDesc: 'Aço forjado em fogo sagrado. Precisão absoluta para o mestre de cozinha.'
   });
 
   const [selectedMainCategory, setSelectedMainCategory] = useState<string>('Todos');
@@ -294,8 +302,8 @@ function App() {
         {/* ATELIÊ - BRANCO */}
         <section id="servicos" className="bg-white py-24 scroll-mt-20">
           <div className="max-w-5xl mx-auto px-6 text-center">
-            <span className="text-luxury-brown text-[10px] font-black uppercase tracking-[0.6em] mb-4 block">Especialidades</span>
-            <h2 className="text-4xl md:text-6xl font-serif text-dark-900 italic font-medium mb-16 tracking-tight">Serviços de Ateliê</h2>
+            <span className="text-luxury-brown text-[10px] font-black uppercase tracking-[0.6em] mb-4 block">{landingPage.atelieSubtitle}</span>
+            <h2 className="text-4xl md:text-6xl font-serif text-dark-900 italic font-medium mb-16 tracking-tight">{landingPage.atelieTitle}</h2>
 
             <div className="flex flex-wrap justify-center gap-8 mb-16 border-b border-slate-50 pb-8">
               <button
@@ -358,11 +366,11 @@ function App() {
           <div className="max-w-5xl mx-auto px-6">
             <div className="flex flex-col md:flex-row justify-between items-end mb-20 gap-8 text-center md:text-left">
               <div>
-                <span className="text-luxury-gold text-[10px] font-black uppercase tracking-[0.6em] mb-4 block">Curadoria</span>
-                <h2 className="text-4xl md:text-6xl font-serif text-white italic font-medium leading-none tracking-tight">Boutique</h2>
+                <span className="text-luxury-gold text-[10px] font-black uppercase tracking-[0.6em] mb-4 block">{landingPage.boutiqueSubtitle}</span>
+                <h2 className="text-4xl md:text-6xl font-serif text-white italic font-medium leading-none tracking-tight">{landingPage.boutiqueTitle}</h2>
               </div>
               <p className="text-slate-400 text-[10px] uppercase tracking-[0.3em] max-w-xs leading-relaxed italic opacity-50">
-                Obras em couro nobre destinadas àqueles que valorizam a eternidade.
+                {landingPage.boutiqueDesc}
               </p>
             </div>
 
@@ -402,12 +410,12 @@ function App() {
           <div className="max-w-5xl mx-auto px-6">
             <div className="flex flex-col md:flex-row justify-between items-center mb-20 text-center md:text-left gap-8">
               <div>
-                <h2 className="text-5xl md:text-7xl font-serif italic text-dark-900 leading-none tracking-tight">Cutelaria</h2>
-                <span className="text-[10px] font-black uppercase tracking-[0.8em] text-luxury-brown mt-4 block">Peças de Autor</span>
+                <h2 className="text-5xl md:text-7xl font-serif italic text-dark-900 leading-none tracking-tight">{landingPage.cutelariaTitle}</h2>
+                <span className="text-[10px] font-black uppercase tracking-[0.8em] text-luxury-brown mt-4 block">{landingPage.cutelariaSubtitle}</span>
               </div>
               <div className="h-20 w-px bg-slate-100 hidden md:block" />
               <p className="text-slate-400 text-[11px] tracking-[0.2em] font-light max-w-sm leading-loose italic uppercase">
-                Aço forjado em fogo sagrado. Precisão absoluta para o mestre de cozinha.
+                {landingPage.cutelariaDesc}
               </p>
             </div>
 
@@ -472,7 +480,7 @@ function App() {
               Artesãos da Renovação
             </div>
             <div className="text-[9px] text-slate-500 uppercase tracking-widest font-black md:text-right">
-              &copy; 2024 Litoral Design Studio
+              &copy; 2026 Parceria Com IA LTDA
             </div>
           </div>
         </div>
