@@ -1819,7 +1819,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   </div>
 
                   <div className="h-4" />
-                  <h4 className="text-[8px] font-black uppercase text-slate-300 tracking-[0.3em] border-b border-slate-50 pb-2">Seção Cutelaria</h4>
+                  <h4 className="text-[8px] font-black uppercase text-slate-300 tracking-[0.3em] border-b border-slate-50 pb-2"></h4>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-1">
                       <label className="text-[10px] uppercase font-black text-slate-400 tracking-widest">Título</label>
