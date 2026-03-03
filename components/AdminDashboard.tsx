@@ -49,7 +49,8 @@ import {
   PieChart,
   Filter,
   Share2,
-  Loader2
+  Loader2,
+  Edit2
 } from 'lucide-react';
 import { Product, User as UserType } from '../types';
 import { motion } from 'framer-motion';
@@ -72,8 +73,9 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [activeSection, setActiveSection] = useState<AdminSection>('overview');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
-  const [modalType, setModalType] = useState<'Novo Pedido Presencial' | 'Novo Mestre' | 'Novo Produto' | 'Novo Cadastro' | 'Novo Insumo' | 'Novo Registro' | 'Nova Nota Fiscal' | 'Nova Transação' | null>(null);
+  const [modalType, setModalType] = useState<'Novo Pedido Presencial' | 'Novo Mestre' | 'Novo Produto' | 'Novo Cadastro' | 'Novo Insumo' | 'Novo Registro' | 'Nova Nota Fiscal' | 'Nova Transação' | 'Editar Ordem' | null>(null);
   const [selectedCustomerInfo, setSelectedCustomerInfo] = useState<string | null>(null);
+  const [selectedOrderToEdit, setSelectedOrderToEdit] = useState<any>(null);
 
   // States for Atendimento Calendar
   const [isCalendarView, setIsCalendarView] = useState(false);
@@ -458,17 +460,41 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
         const existingCustomer = customers.find(c => c.name.toLowerCase() === name.toLowerCase());
         if (existingCustomer) {
-          setCustomers(prev => prev.map(c => c.id === existingCustomer.id ? { ...c, visits: c.visits + 1 } : c));
+          const newVisits = existingCustomer.visits + 1;
+
+          // Update in Supabase
+          const { error: updateError } = await supabase
+            .from('customers')
+            .update({ visits: newVisits })
+            .eq('id', existingCustomer.id);
+
+          if (updateError) console.error('Error updating customer visits:', updateError);
+
+          setCustomers(prev => prev.map(c => c.id === existingCustomer.id ? { ...c, visits: newVisits } : c));
         } else {
-          const newCustomer = {
-            id: `C${customers.length + 1}`,
+          const newCustomerData = {
             name: name,
-            email: email || 'n/a',
-            phone: phone || 'n/a',
+            email: email || null,
+            phone: phone || null,
             visits: 1,
             loyalty: 'Silver'
           };
-          setCustomers(prev => [...prev, newCustomer]);
+
+          // Insert into Supabase
+          const { data: newCustomer, error: insertError } = await supabase
+            .from('customers')
+            .insert([newCustomerData])
+            .select()
+            .single();
+
+          if (insertError) {
+            console.error('Error creating new customer:', insertError);
+            throw insertError;
+          }
+
+          if (newCustomer) {
+            setCustomers(prev => [...prev, newCustomer]);
+          }
         }
         setModalType(null);
       } catch (err: any) {
@@ -550,6 +576,39 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
       } catch (err: any) {
         console.error(err);
         alert('Erro ao registrar transação: ' + (err.message || 'Desconhecido'));
+      } finally {
+        setIsModalLoading(false);
+      }
+    } else if (modalType === 'Editar Ordem' && selectedOrderToEdit) {
+      setIsModalLoading(true);
+      try {
+        const updatedService = formData.get('service') as string;
+        const updatedValue = parseFloat(formData.get('value') as string) || 0;
+        const updatedDeadline = formData.get('deadline') as string;
+
+        const { error } = await supabase
+          .from('orders')
+          .update({
+            service: updatedService,
+            value: updatedValue,
+            deadline: updatedDeadline
+          })
+          .eq('id', selectedOrderToEdit.id);
+
+        if (error) throw error;
+
+        setOrders(prev => prev.map(o => o.id === selectedOrderToEdit.id ? {
+          ...o,
+          service: updatedService,
+          value: updatedValue,
+          deadline: updatedDeadline
+        } : o));
+
+        setModalType(null);
+        setSelectedOrderToEdit(null);
+      } catch (err: any) {
+        console.error(err);
+        alert('Erro ao atualizar ordem: ' + (err.message || 'Desconhecido'));
       } finally {
         setIsModalLoading(false);
       }
@@ -916,13 +975,25 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                                 R$ {o.value.toFixed(2)}
                               </td>
                               <td className="px-8 py-6 text-center">
-                                <button
-                                  onClick={() => handleDeleteOrder(o.id)}
-                                  className="p-2 text-slate-300 hover:text-red-500 transition-colors"
-                                  title="Excluir Ordem"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </button>
+                                <div className="flex items-center justify-center gap-2">
+                                  <button
+                                    onClick={() => {
+                                      setSelectedOrderToEdit(o);
+                                      setModalType('Editar Ordem');
+                                    }}
+                                    className="p-2 text-slate-300 hover:text-brand-600 transition-colors"
+                                    title="Editar Ordem"
+                                  >
+                                    <Edit2 className="w-4 h-4" />
+                                  </button>
+                                  <button
+                                    onClick={() => handleDeleteOrder(o.id)}
+                                    className="p-2 text-slate-300 hover:text-red-500 transition-colors"
+                                    title="Excluir Ordem"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                </div>
                               </td>
                             </tr>
                           ))}
@@ -1014,13 +1085,25 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                               R$ {o.value.toFixed(2)}
                             </td>
                             <td className="px-8 py-6 text-center">
-                              <button
-                                onClick={() => handleDeleteOrder(o.id)}
-                                className="p-2 text-slate-300 hover:text-red-500 transition-colors"
-                                title="Excluir Ordem"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
+                              <div className="flex items-center justify-center gap-2">
+                                <button
+                                  onClick={() => {
+                                    setSelectedOrderToEdit(o);
+                                    setModalType('Editar Ordem');
+                                  }}
+                                  className="p-2 text-slate-300 hover:text-brand-600 transition-colors"
+                                  title="Editar Ordem"
+                                >
+                                  <Edit2 className="w-4 h-4" />
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteOrder(o.id)}
+                                  className="p-2 text-slate-300 hover:text-red-500 transition-colors"
+                                  title="Excluir Ordem"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </div>
                             </td>
                           </tr>
                         );
@@ -1808,11 +1891,44 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                           className="w-full bg-slate-50 border border-slate-100 p-4 text-xs font-bold focus:ring-1 focus:ring-brand-600 outline-none"
                         />
                       </div>
-                      <div className="space-y-1"><label className="text-[9px] uppercase font-black text-slate-400 tracking-widest">Serviço Solicitado</label><input name="service" required className="w-full bg-slate-50 border border-slate-100 p-4 text-xs font-bold" /></div>
-                      <div className="space-y-1"><label className="text-[9px] uppercase font-black text-slate-400 tracking-widest">Serviço Solicitado</label><input name="service" required className="w-full bg-slate-50 border border-slate-100 p-4 text-xs font-bold" /></div>
+                      <div className="space-y-1">
+                        <label className="text-[9px] uppercase font-black text-slate-400 tracking-widest">Serviço Solicitado</label>
+                        <input name="service" required className="w-full bg-slate-50 border border-slate-100 p-4 text-xs font-bold" />
+                      </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-1"><label className="text-[9px] uppercase font-black text-slate-400 tracking-widest">Valor Acordado (R$)</label><input name="value" type="number" step="0.01" required className="w-full bg-slate-50 border border-slate-100 p-4 text-xs font-bold" /></div>
-                        <div className="space-y-1"><label className="text-[9px] uppercase font-black text-slate-400 tracking-widest">Data de Entrega</label><input name="deadline" type="date" required className="w-full bg-slate-50 border border-slate-100 p-4 text-xs font-bold" /></div>
+                        <div className="space-y-1">
+                          <label className="text-[9px] uppercase font-black text-slate-400 tracking-widest">Valor Acordado (R$)</label>
+                          <input name="value" type="number" step="0.01" required className="w-full bg-slate-50 border border-slate-100 p-4 text-xs font-bold" />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[9px] uppercase font-black text-slate-400 tracking-widest">Data de Entrega</label>
+                          <input name="deadline" type="date" required className="w-full bg-slate-50 border border-slate-100 p-4 text-xs font-bold" />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {modalType === 'Editar Ordem' && selectedOrderToEdit && (
+                    <div className="space-y-4">
+                      <div className="p-4 bg-brand-50 border-l-4 border-brand-600 mb-6">
+                        <h5 className="text-[10px] font-black uppercase tracking-widest text-brand-900 flex items-center gap-2">
+                          <Edit2 className="w-3.5 h-3.5" /> Editar Ordem
+                        </h5>
+                        <p className="text-[9px] text-brand-600 mt-1">Alterando detalhes do serviço para o cliente <strong>{selectedOrderToEdit.customer}</strong>.</p>
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[9px] uppercase font-black text-slate-400 tracking-widest">Serviço Solicitado</label>
+                        <input name="service" defaultValue={selectedOrderToEdit.service} required className="w-full bg-slate-50 border border-slate-100 p-4 text-xs font-bold" />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-1">
+                          <label className="text-[9px] uppercase font-black text-slate-400 tracking-widest">Valor (R$)</label>
+                          <input name="value" type="number" step="0.01" defaultValue={selectedOrderToEdit.value} required className="w-full bg-slate-50 border border-slate-100 p-4 text-xs font-bold" />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[9px] uppercase font-black text-slate-400 tracking-widest">Data de Entrega</label>
+                          <input name="deadline" type="date" defaultValue={selectedOrderToEdit.deadline} required className="w-full bg-slate-50 border border-slate-100 p-4 text-xs font-bold" />
+                        </div>
                       </div>
                     </div>
                   )}
@@ -1990,39 +2106,43 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
               <div className="p-8">
                 {isEditingInvoice ? (
-                  <form onSubmit={async (e) => {
-                    e.preventDefault();
-                    setIsModalLoading(true);
-                    const formData = new FormData(e.currentTarget);
-                    try {
-                      const updatedNF = {
-                        ...viewingInvoice,
-                        id: formData.get('nf_id') as string,
-                        orderId: formData.get('os_ref') as string,
-                        customer: formData.get('customer') as string,
-                        date: formData.get('date') as string,
-                        value: parseFloat(formData.get('value') as string) || 0,
-                        status: formData.get('status') as string,
-                      };
+                  <form
+                    onSubmit={async (e) => {
+                      e.preventDefault();
+                      setIsModalLoading(true);
+                      const formData = new FormData(e.currentTarget);
 
-                      const { error } = await supabase
-                        .from('invoices')
-                        .update(updatedNF)
-                        .eq('id', viewingInvoice.id);
+                      try {
+                        const updatedNF = {
+                          ...viewingInvoice,
+                          id: formData.get('nf_id') as string,
+                          orderId: formData.get('os_ref') as string,
+                          customer: formData.get('customer') as string,
+                          date: formData.get('date') as string,
+                          value: parseFloat(formData.get('value') as string) || 0,
+                          status: formData.get('status') as string,
+                        };
 
-                      if (error) throw error;
+                        const { error } = await supabase
+                          .from('invoices')
+                          .update(updatedNF)
+                          .eq('id', viewingInvoice.id);
 
-                      setInvoices(prev => prev.map(nf => nf.id === viewingInvoice.id ? updatedNF : nf));
-                      setViewingInvoice(null);
-                      setIsEditingInvoice(false);
-                      alert('Nota Fiscal atualizada com sucesso!');
-                    } catch (err) {
-                      console.error(err);
-                      alert('Erro ao atualizar nota fiscal');
-                    } finally {
-                      setIsModalLoading(false);
-                    }
-                  }} className="space-y-6">
+                        if (error) throw error;
+
+                        setInvoices(prev => prev.map(nf => nf.id === viewingInvoice.id ? updatedNF : nf));
+                        setViewingInvoice(null);
+                        setIsEditingInvoice(false);
+                        alert('Nota Fiscal atualizada com sucesso!');
+                      } catch (err) {
+                        console.error(err);
+                        alert('Erro ao atualizar nota fiscal');
+                      } finally {
+                        setIsModalLoading(false);
+                      }
+                    }}
+                    className="space-y-6"
+                  >
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-1">
                         <label className="text-[9px] uppercase font-black text-slate-400 tracking-widest">ID Fiscal</label>
@@ -2131,9 +2251,10 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
               </div>
             </motion.div>
           </div>
-        )}
-      </main>
-    </div>
+        )
+        }
+      </main >
+    </div >
   );
 };
 
