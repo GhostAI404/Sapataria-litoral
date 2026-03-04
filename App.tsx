@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   Phone as PhoneIcon,
   Instagram as InstagramIcon,
@@ -135,6 +135,31 @@ function App() {
   });
 
   const [selectedMainCategory, setSelectedMainCategory] = useState<string>('Todos');
+  const [adminClickCount, setAdminClickCount] = useState(0);
+  const clickTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleSecretAdminClick = () => {
+    setAdminClickCount(prev => {
+      const newCount = prev + 1;
+
+      if (clickTimeoutRef.current) clearTimeout(clickTimeoutRef.current);
+
+      if (newCount >= 5) {
+        if (user) {
+          setView('admin');
+        } else {
+          setIsAuthOpen(true);
+        }
+        return 0;
+      }
+
+      clickTimeoutRef.current = setTimeout(() => {
+        setAdminClickCount(0);
+      }, 3000);
+
+      return newCount;
+    });
+  };
 
   const mainServiceCategories = useMemo(() => {
     return Array.from(new Set(allProducts.filter(p => p.mainCategory !== 'Loja' && p.mainCategory !== 'Cutelaria').map(p => p.mainCategory)));
@@ -476,7 +501,10 @@ function App() {
                 CEP 11608-587
               </span>
             </div>
-            <div className="text-[10px] text-luxury-gold font-black uppercase tracking-[0.6em] italic">
+            <div
+              onClick={handleSecretAdminClick}
+              className="text-[10px] text-luxury-gold font-black uppercase tracking-[0.6em] italic cursor-pointer select-none"
+            >
               Artesãos da Renovação
             </div>
             <div className="text-[9px] text-slate-500 uppercase tracking-widest font-black md:text-right">
